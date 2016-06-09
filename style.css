@@ -1,0 +1,83 @@
+body{
+   background-color: antiquewhite;
+}
+
+
+.web_dialog_overlay{
+   position: fixed;
+   top: 0;
+   right: 0;
+   bottom: 0;
+   left: 0;
+   height: 100%;
+   width: 100%;
+   margin: 0;
+   padding: 0;
+   background: #000000;
+   opacity: .25;
+   filter: alpha(opacity=35);
+   -moz-opacity: .15;
+   z-index: 101;
+   display: none;
+}
+
+.web_dialog {
+   text-align: center;
+   position: fixed;
+   border-radius:10px;
+   width: 380px;
+   height: 200px;
+   top: 50%;
+   left: 50%;
+   margin-left: -190px;
+   margin-top: -100px;
+   background-color: #ffffff;
+   border: 2px solid #336699;
+   padding: 20px;
+   z-index: 102;
+   font-family: Verdana;
+   font-size: 10pt;
+}
+
+.web_dialog>button{
+   margin: 10px 20px;
+   border: 2px solid indianred;
+   color: indianred;
+   font-weight: bolder;
+}
+
+h1{
+   text-align: center;
+   font-family: cursive;
+   font-size: 50px;
+   font-weight: bold;
+}
+
+#allGame{
+   background-color:ghostwhite;
+   text-align: center;
+   margin: 5% 25%;
+   border: 50px solid indianred;
+   border-radius: 10%
+}
+
+.eachCell{
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   height: 150px;
+   padding-right:0;
+   padding-left:0;
+   margin:0px;
+   border-bottom:5px solid black;
+   border-right: 5px solid black;
+   font-size: 50px;
+   color: indianred;
+}
+.noBorder{
+   border-right:none;
+}
+
+.noBottomBorder{
+   border-bottom:none;
+}
