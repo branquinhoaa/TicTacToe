@@ -1,61 +1,61 @@
+function Player(id, figure, name){
+   this.figure=figure;
+   this.id=id;
+   this.moves=[];
+   this.name=name;
+}
+
 $(document).ready(function(){
    var noWinners=true,
-       xis=[],
-       bola=[],
-       chosen,
-       figure,
-       figureMachine,
-       idPerson,
        whoWon,
-       idMachine;
+       playerPers,
+       playerMach,
+       possibleFig={
+          'xis' : 'X',
+          'circle' : 'O'
+       };
 
    ShowDialog();
 
    $('button').on("click", function(){
-      chosen =this.id;
-      figure = (chosen == 'xis') ? 'X' : 'O';
-      idPerson =  (chosen == 'xis') ? 'xis' : 'circle';
-      figureMachine =  (chosen == 'xis') ? 'O' : 'X';
-      idMachine =  (chosen == 'xis') ? 'circle' : 'xis';
+      var chosen =this.id;
+      var idMachine =  (chosen == 'xis') ? 'circle' : 'xis';
+      playerPers = new Player(chosen,possibleFig[chosen], 'you');
+      playerMach = new Player (idMachine,possibleFig[idMachine], 'machine');
       HideDialog();
-      playMachine(figureMachine, idMachine);
+      playMachine();
    });
 
    $("div").on("click",function(){
       var spot=this.id;
       var element =$("#"+spot+"");
       if (!element.html()){
-         element.html(figure);
-         if (idPerson=='xis'){
-            xis.push(parseInt(spot));
-         } else{ bola.push(parseInt(spot));}
+         element.html(playerPers.figure);
+         playerPers.moves.push(parseInt(spot));
       }
-
-      hasWinner("person");
-      if (!hasMoreGames()&&noWinners){
-         alert("Nobody won! try again!!");
-         location.reload(true);
-      } else if(noWinners){
-         playMachine(figureMachine, idMachine);
-      } else {
-         congrats();
-      }    
+      hasWinner(playerPers);
+      if (noWinners){
+         playMachine();
+      }
    });   
 
-   function playMachine(figureMachine, idMachine){
+   function playMachine(){
       var aleat = Math.floor((Math.random() * 9) + 1);
       var element = $("#"+aleat+"");
       while (element.html()){
-         //chose other
          aleat = Math.floor((Math.random() * 9) + 1);
          element =$("#"+aleat+"");
       } 
-      element.html(figureMachine);   
-      if (idMachine=='xis'){
-         xis.push(aleat);
-      } else { bola.push(aleat);}
+      element.html(playerMach.figure);   
+      playerMach.moves.push(aleat);
+      hasWinner(playerMach);
+   }
 
-      hasWinner("machine");
+
+   function hasWinner(player){
+      if(player.moves.length>=3){
+         verify(player.moves, player.name);  
+      }
       if (!hasMoreGames()&&noWinners){
          alert("Nobody won! try again!!");
          location.reload(true);
@@ -63,35 +63,24 @@ $(document).ready(function(){
       else if(noWinners){
          return;
       } else {
-         congrats();
+         alert(whoWon+" won!");
+         location.reload(true);
       }
-   }
+   }  
 
-
-   function hasWinner(winner){
-      if (xis.length>=3) {
-         verify(xis,winner);
-      }  
-      if (bola.length>=3){
-         verify(bola,winner);
-      }
-   }
-
-   function verify(array,winner){
+   function verify(playerMoves,playerName){
       var greatPlay=[[1,2,3],[1,4,7],[1,5,9],[4,5,6],[7,8,9],[2,5,8],[3,6,9],[3,5,7]];
-
       greatPlay.forEach(function(arr){
-         containsAll(arr,array);
+         containsAll(arr,playerMoves);
       });
-
-      function containsAll(greatArray, allplay){    
+      function containsAll(greatArray, playerMoves){    
          for(var i = 0 , len = greatArray.length; i < len; i++){
-            if($.inArray(greatArray[i], allplay) == -1) {
+            if($.inArray(greatArray[i], playerMoves) == -1) {
                return false;
             }
          }
          noWinners=false; 
-         whoWon=winner;
+         whoWon=playerName;
       }
    }
 
@@ -105,35 +94,10 @@ $(document).ready(function(){
       $("#dialog").fadeOut();
    }
 
-   function congrats(){
-      if (whoWon=="machine"){
-         alert("Sorry, you lost! :(");
-         location.reload(true);
-      } 
-      if (whoWon=="person"){
-         alert("congratulations!!! :D");   
-         location.reload(true);
-      }
-
-   }
-
    function hasMoreGames(){
-      xGames=xis.length;
-      oGames=bola.length;
-      if (xGames+oGames==9){
+      if (playerMach.moves.length+playerPers.moves.length==9){
          return false;
       }
       return true;
-   }
-
-   function resetVariables(){
-      xis=[];
-      bola=[];
-      noWinners=true;
-      whoWon="";
-      for(var i=1; i<=9; i++){
-         $("#"+i).html("");
-      }
-      playMachine(figureMachine, idMachine);
    }
 });   
