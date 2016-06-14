@@ -5,99 +5,122 @@ function Player(id, figure, name){
    this.name=name;
 }
 
-$(document).ready(function(){
-   var noWinners=true,
-       whoWon,
-       playerPers,
-       playerMach,
-       possibleFig={
-          'xis' : 'X',
-          'circle' : 'O'
-       };
+function UI(){
+   this.possibleFig={
+      'xis' : 'X',
+      'circle' : 'O'
+   };
+}
 
-   ShowDialog();
+UI.prototype.HideDialog = function(){
+   $("#overlay").hide();
+   $("#dialog").fadeOut();
+}
 
+UI.prototype.showDialog = function (){
+   $("#overlay").show();
+   $("#dialog").fadeIn();  
+}
+
+UI.prototype.startGame = function(){
+   var self = this;
    $('button').on("click", function(){
       var chosen =this.id;
+      var persFig = self.possibleFig[chosen];
       var idMachine =  (chosen == 'xis') ? 'circle' : 'xis';
-      playerPers = new Player(chosen,possibleFig[chosen], 'you');
-      playerMach = new Player (idMachine,possibleFig[idMachine], 'machine');
-      HideDialog();
-      playMachine();
+      var machFig = self.possibleFig[idMachine];
+      var playerPers = new Player(chosen,persFig, 'you');
+      var playerMach = new Player (idMachine,machFig, 'machine');
+      self.HideDialog();
+      var game = new Game(playerMach,playerPers);
+      game.bindPlayerEvents();
+      game.machinePlay();
    });
+}
 
+function Game(playerMach, playerPers){
+   this.noWinners = true;
+   this.whoWon;
+   this.playerMach=playerMach;
+   this.playerPers=playerPers;
+}
+
+
+Game.prototype.bindPlayerEvents = function(){
+   var self = this;
    $("div").on("click",function(){
       var spot=this.id;
       var element =$("#"+spot+"");
       if (!element.html()){
-         element.html(playerPers.figure);
-         playerPers.moves.push(parseInt(spot));
-      }
-      hasWinner(playerPers);
-      if (noWinners){
-         playMachine();
-      }
-   });   
-
-   function playMachine(){
-      var aleat = Math.floor((Math.random() * 9) + 1);
-      var element = $("#"+aleat+"");
-      while (element.html()){
-         aleat = Math.floor((Math.random() * 9) + 1);
-         element =$("#"+aleat+"");
-      } 
-      element.html(playerMach.figure);   
-      playerMach.moves.push(aleat);
-      hasWinner(playerMach);
-   }
-
-
-   function hasWinner(player){
-      if(player.moves.length>=3){
-         verify(player.moves, player.name);  
-      }
-      if (!hasMoreGames()&&noWinners){
-         alert("Nobody won! try again!!");
-         location.reload(true);
-      }
-      else if(noWinners){
-         return;
+         element.html(self.playerPers.figure);
+         self.playerPers.moves.push(parseInt(spot));
       } else {
-         alert(whoWon+" won!");
-         location.reload(true);
+         return;
       }
-   }  
+      self.hasWinner(self.playerPers);
+      if (self.noWinners){
+         self.machinePlay();
+      }
+   });
+}
 
-   function verify(playerMoves,playerName){
-      var greatPlay=[[1,2,3],[1,4,7],[1,5,9],[4,5,6],[7,8,9],[2,5,8],[3,6,9],[3,5,7]];
-      greatPlay.forEach(function(arr){
-         containsAll(arr,playerMoves);
-      });
-      function containsAll(greatArray, playerMoves){    
-         for(var i = 0 , len = greatArray.length; i < len; i++){
-            if($.inArray(greatArray[i], playerMoves) == -1) {
-               return false;
-            }
+
+Game.prototype.machinePlay = function (){
+   var aleat =  Math.floor((Math.random() * 9) + 1);   
+   var element = $("#"+aleat+"");
+   while (element.html()){
+      aleat = Math.floor((Math.random() * 9) + 1);
+      element =$("#"+aleat+"");
+   } 
+   element.html(this.playerMach.figure);   
+   this.playerMach.moves.push(aleat);
+   this.hasWinner(this.playerMach);
+}
+
+Game.prototype.hasWinner= function (player){
+   if(player.moves.length>=3){
+      this.verify(player.moves, player.name);  
+   }
+   if (!this.hasMoreGames(this.playerMach, this.playerPers)&&this.noWinners){
+      alert("Nobody won! try again!!");
+      location.reload(true);
+   }
+   if(this.noWinners){
+      return;
+   } 
+   else {
+      alert(this.whoWon+" won!");
+      location.reload(true);
+   }
+}  
+
+Game.prototype.verify = function (playerMoves,playerName){
+   var self=this;
+   var greatPlay=[[1,2,3],[1,4,7],[1,5,9],[4,5,6],[7,8,9],[2,5,8],[3,6,9],[3,5,7]];
+   greatPlay.forEach(function(arr){
+      containsAll(arr,playerMoves);
+   });
+   function containsAll(greatArray, playerMoves){    
+      for(var i = 0 , len = greatArray.length; i < len; i++){
+         if($.inArray(greatArray[i], playerMoves) == -1) {
+            return false;
          }
-         noWinners=false; 
-         whoWon=playerName;
       }
+      self.noWinners=false; 
+      self.whoWon=playerName;
    }
+}
 
-   function ShowDialog(){
-      $("#overlay").show();
-      $("#dialog").fadeIn();
+Game.prototype.hasMoreGames = function (){
+   if (this.playerMach.moves.length+this.playerPers.moves.length==9){
+      return false;
    }
+   return true;
+}
 
-   function HideDialog(){
-      $("#overlay").hide();
-      $("#dialog").fadeOut();
-   }
 
-   function hasMoreGames(){
-      if (playerMach.moves.length+playerPers.moves.length==9){
-         return false;
-      }
-      return true;
-   }
+$(document).ready(function(){
+   var ui = new UI();
+   ui.showDialog();
+   ui.startGame();
 });   
