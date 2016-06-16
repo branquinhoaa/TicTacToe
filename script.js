@@ -1,69 +1,15 @@
-function Player(id, figure, name){
-   this.figure=figure;
-   this.id=id;
-   this.moves=[];
-   this.name=name;
-}
+$(document).ready(function(){
+   var ui = new UI();
+   ui.showDialog();
+   ui.startGame();
+});   
 
-function UI(){
-   this.possibleFig={
-      'xis' : 'X',
-      'circle' : 'O'
-   };
-}
-
-UI.prototype.HideDialog = function(){
-   $("#overlay").hide();
-   $("#dialog").fadeOut();
-}
-
-UI.prototype.showDialog = function (){
-   $("#overlay").show();
-   $("#dialog").fadeIn();  
-}
-
-UI.prototype.startGame = function(){
-   var self = this;
-   $('button').on("click", function(){
-      var chosen =this.id;
-      var persFig = self.possibleFig[chosen];
-      var idMachine =  (chosen == 'xis') ? 'circle' : 'xis';
-      var machFig = self.possibleFig[idMachine];
-      var playerPers = new Player(chosen,persFig, 'you');
-      var playerMach = new Player (idMachine,machFig, 'machine');
-      self.HideDialog();
-      var game = new Game(playerMach,playerPers);
-      game.bindPlayerEvents();
-      game.machinePlay();
-   });
-}
-
-function Game(playerMach, playerPers){
+function Game(){
    this.noWinners = true;
    this.whoWon;
-   this.playerMach=playerMach;
-   this.playerPers=playerPers;
+   this.playerMach;
+   this.playerPers;
 }
-
-
-Game.prototype.bindPlayerEvents = function(){
-   var self = this;
-   $("div").on("click",function(){
-      var spot=this.id;
-      var element =$("#"+spot+"");
-      if (!element.html()){
-         element.html(self.playerPers.figure);
-         self.playerPers.moves.push(parseInt(spot));
-      } else {
-         return;
-      }
-      self.hasWinner(self.playerPers);
-      if (self.noWinners){
-         self.machinePlay();
-      }
-   });
-}
-
 
 Game.prototype.machinePlay = function (){
    var aleat =  Math.floor((Math.random() * 9) + 1);   
@@ -118,9 +64,61 @@ Game.prototype.hasMoreGames = function (){
    return true;
 }
 
+function Player(id, figure, name){
+   this.figure=figure;
+   this.id=id;
+   this.moves=[];
+   this.name=name;
+}
 
-$(document).ready(function(){
-   var ui = new UI();
-   ui.showDialog();
-   ui.startGame();
-});   
+function UI(){
+   this.possibleFig={
+      'xis' : 'X',
+      'circle' : 'O'
+   };
+   this.game=new Game();
+}
+
+UI.prototype.HideDialog = function(){
+   $("#overlay").hide();
+   $("#dialog").fadeOut();
+}
+
+UI.prototype.showDialog = function (){
+   $("#overlay").show();
+   $("#dialog").fadeIn();  
+}
+
+UI.prototype.startGame = function(){
+   var self = this;
+   $('button').on("click", function(){
+      var chosen =this.id;
+      var persFig = self.possibleFig[chosen];
+      var idMachine =  (chosen == 'xis') ? 'circle' : 'xis';
+      var machFig = self.possibleFig[idMachine];
+      self.game.playerPers = new Player(chosen,persFig, 'you');
+      self.game.playerMach = new Player (idMachine,machFig, 'machine');
+      self.HideDialog();
+      self.bindPlayerEvents();
+      self.game.machinePlay();
+   });
+}
+
+UI.prototype.bindPlayerEvents = function(){
+   var self = this;
+   $("div").on("click",function(){
+      var spot=this.id;
+      var element =$("#"+spot+"");
+      if (!element.html()){
+         element.html(self.game.playerPers.figure);
+         self.game.playerPers.moves.push(parseInt(spot));
+      } else {
+         return;
+      }
+      self.game.hasWinner(self.game.playerPers);
+      if (self.game.noWinners){
+         self.game.machinePlay();
+      }
+   });
+}
+
